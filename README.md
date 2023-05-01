@@ -16,7 +16,7 @@
 ## Getting Started:
  To run the program, build the project files and run Main.java.   
 ## Future Improvements:
- - Issue and return books
+ - Input validation
  - Better looking GUI
  - Databse instead of txt files to store data
  - Add screenshots to repository 
