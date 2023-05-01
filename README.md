@@ -18,7 +18,7 @@
 ## Future Improvements:
  - Input validation
  - Better looking GUI
- - Databse instead of txt files to store data
+ - Database instead of txt files to store data
  - Add screenshots to repository 
 ## Contributors
  - [Mohammad Helaly](https://github.com/MohammadHelaly)
