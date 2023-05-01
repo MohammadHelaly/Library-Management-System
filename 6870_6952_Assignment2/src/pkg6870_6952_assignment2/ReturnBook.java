@@ -6,6 +6,7 @@
 package pkg6870_6952_assignment2;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -127,8 +128,10 @@ String stID = jTextField2.getText();
             IssuedBooks.returnBook(callno,stID);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(AddBook.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ReturnBook.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.hide();
+        this.dispose();
 new BookReturnSuccess().setVisible(true);    // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 

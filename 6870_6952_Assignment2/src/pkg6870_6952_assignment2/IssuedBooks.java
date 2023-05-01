@@ -5,13 +5,20 @@
  */
 package pkg6870_6952_assignment2;
 
+import java.util.List;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Scanner;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -76,13 +83,13 @@ public class IssuedBooks {
       
     static IssuedBooks bi[] = new IssuedBooks[100];
     static int count = 0;
-    static int check = 0;
+    //static int check = 0;
 
     public static void readFile() throws FileNotFoundException, ParseException {
-        File f = new File("issuebooks.txt");
+        //File f = new File("issuebooks.txt");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
         count = 0;
-        Scanner s = new Scanner(f);
+        Scanner s = new Scanner("issuebooks.txt");
         while (s.hasNext()) {
             String callno = s.next();
             String stID = s.next();
@@ -97,8 +104,8 @@ public class IssuedBooks {
     }
 
     public static void saveFile() throws FileNotFoundException {
-        File f = new File("issuebooks.txt");
-        PrintWriter pw = new PrintWriter(f);
+        //File f = new File("issuebooks.txt");
+        PrintWriter pw = new PrintWriter("issuebooks.txt");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
 
         for (int i = 0; i < count; i++) {
@@ -113,38 +120,43 @@ public class IssuedBooks {
 
     public static void issueBook(String callno, String stID, String stName, String stContact, Date dateIssued) throws FileNotFoundException {
        bi[count] = new IssuedBooks(callno,stID,stName,stContact,dateIssued);
-       for (int check = 0; check<Books.count;check++){
-       if(Books.b[check].getCallno() == callno && Integer.parseInt(Books.b[count].getQuantity())>0)
-       {
-           Books.b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())-1));
-       }
-       }
-       Books.saveFile();;
+      // for (int check = 0; check<Books.count;check++){
+      // if(Books.b[check].getCallno() == callno && Integer.parseInt(Books.b[count].getQuantity())>0)
+       //{
+        //   Books.b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())-1));
+      // }
+       //}
+       //Books.saveFile();
         count++;
         saveFile();
     }
 
-    public static void returnBook(String callno, String stID) throws FileNotFoundException {
-        boolean found = false;
-        for (int i = 0; i < count; i++) {
-        if (bi[i].getCallno() == callno && bi[i].stID == stID) {
-                found = true;
-                       for (int check = 0; check<Books.count;check++){
-       if(Books.b[check].getCallno() == callno)
-       {
-           Books.b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())+1));
-       }
-       }
-                for (int j = i; j < count - 1; j++) {
-                    bi[j] = bi[j + 1];
-                }
-                count--;
-                break;
+    public static void returnBook(String callno, String stID) throws FileNotFoundException, IOException {
+  
+         File f = new File("issuebooks.txt");
+        // Step 2: Read the contents of the file into an ArrayList
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
             }
         }
-        if (found) {
-            saveFile();
-            Books.saveFile();
+        
+        // Step 3: Loop through the ArrayList and remove any lines that contain the string "delete me"
+        Iterator<String> iter = lines.iterator();
+        while (iter.hasNext()) {
+            String line = iter.next();
+            if (line.contains(callno) && line.contains(stID)) {
+                iter.remove();
+            }
+        }
+        
+        // Step 4: Write the modified contents back to the file
+        try (PrintWriter writer = new PrintWriter(new FileWriter(f))) {
+            for (String line : lines) {
+                writer.println(line);
+            }
         }
     }
 }
