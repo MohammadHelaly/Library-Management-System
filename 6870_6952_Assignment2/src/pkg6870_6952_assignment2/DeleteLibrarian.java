@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class DeleteLibrarian extends javax.swing.JFrame {
 
-     Librarians l[] = new Librarians[100];
+    Librarians l[] = new Librarians[100];
     int count = 0;
     /**
      * Creates new form DeleteLibrarian

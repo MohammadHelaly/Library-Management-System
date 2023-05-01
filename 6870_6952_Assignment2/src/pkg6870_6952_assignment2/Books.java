@@ -83,14 +83,14 @@ public class Books {
     }
     
       
-    static Books b[] = new Books[100];
-    static int count = 0;
+    public static Books b[] = new Books[100];
+    public static int count = 0;
 
     public static void readFile() throws FileNotFoundException, ParseException {
-        File f = new File("books.txt");
+        //File f = new File("books.txt");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
         count = 0;
-        Scanner s = new Scanner(f);
+        Scanner s = new Scanner("books.txt");
         while (s.hasNext()) {
             String callno = s.next();
             String title = s.next();
@@ -106,8 +106,8 @@ public class Books {
     }
 
     public static void saveFile() throws FileNotFoundException {
-        File f = new File("books.txt");
-        PrintWriter pw = new PrintWriter(f);
+        //File f = new File("books.txt");
+        PrintWriter pw = new PrintWriter("books.txt");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
 
         for (int i = 0; i < count; i++) {
@@ -130,7 +130,7 @@ public class Books {
     public static void deleteBook(String callno) throws FileNotFoundException {
         boolean found = false;
         for (int i = 0; i < count; i++) {
-            if (b[i].getCallno() == callno) {
+            if (b[i].getCallno().equals(callno)) {
                 found = true;
                 for (int j = i; j < count - 1; j++) {
                     b[j] = b[j + 1];
@@ -143,5 +143,18 @@ public class Books {
             saveFile();
         }
     }
+        public static void decBook(String callno) throws FileNotFoundException {
+       for (int check = 0; check<count;check++){
+       if(b[check].getCallno().equals(callno) && Integer.parseInt(Books.b[count].getQuantity())>0)
+       {
+           System.out.print(b[check].getQuantity());
+           b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())-1));
+           System.out.print(b[check].getQuantity());
+       }
+       }
+        saveFile();
+    }
+    
+    
 }
 

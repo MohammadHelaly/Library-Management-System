@@ -23,8 +23,8 @@ import static pkg6870_6952_assignment2.Librarians.saveFile;
  */
 public class AddLibrarian extends javax.swing.JFrame {
     
-     Librarians l[] = new Librarians[100];
-    int count = 0;
+    // Librarians l[] = new Librarians[100];
+    //int count = 0;
 
     /**
      * Creates new form AddLibrarian
