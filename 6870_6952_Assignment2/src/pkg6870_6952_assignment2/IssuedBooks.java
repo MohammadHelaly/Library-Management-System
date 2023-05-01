@@ -120,43 +120,38 @@ public class IssuedBooks {
 
     public static void issueBook(String callno, String stID, String stName, String stContact, Date dateIssued) throws FileNotFoundException {
        bi[count] = new IssuedBooks(callno,stID,stName,stContact,dateIssued);
-      // for (int check = 0; check<Books.count;check++){
-      // if(Books.b[check].getCallno() == callno && Integer.parseInt(Books.b[count].getQuantity())>0)
-       //{
-        //   Books.b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())-1));
-      // }
-       //}
+       for (int check = 0; check<Books.count;check++){
+       if(Books.b[check].getCallno() == callno && Integer.parseInt(Books.b[count].getQuantity())>0)
+       {
+           Books.b[check].setQuantity(Integer.toString(Integer.parseInt(Books.b[count].getQuantity())-1));
+       }
+       }
        //Books.saveFile();
         count++;
         saveFile();
     }
 
-    public static void returnBook(String callno, String stID) throws FileNotFoundException, IOException {
-  
-         File f = new File("issuebooks.txt");
-        // Step 2: Read the contents of the file into an ArrayList
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
+    public static void returnBook(String clno, String sD) throws FileNotFoundException, IOException {
+
+      List<String> lines = new ArrayList<>();
+try (BufferedReader reader = new BufferedReader(new FileReader("issuebooks.txt"))) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        if (line.contains(clno) && line.contains(sD)) {
+        } else {
+            lines.add(line);
+            //System.out.println(line);
         }
-        
-        // Step 3: Loop through the ArrayList and remove any lines that contain the string "delete me"
-        Iterator<String> iter = lines.iterator();
-        while (iter.hasNext()) {
-            String line = iter.next();
-            if (line.contains(callno) && line.contains(stID)) {
-                iter.remove();
-            }
-        }
-        
-        // Step 4: Write the modified contents back to the file
-        try (PrintWriter writer = new PrintWriter(new FileWriter(f))) {
-            for (String line : lines) {
-                writer.println(line);
-            }
-        }
+    }
+}
+
+// Step 4: Write the modified contents back to the file
+try (PrintWriter writer = new PrintWriter(new FileWriter("issuebooks.txt"))) {
+    for (String line : lines) {
+        writer.println(line);
+       // System.out.println(line);
+    }
+}            
+                
     }
 }

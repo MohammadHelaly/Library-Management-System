@@ -95,9 +95,9 @@ public class Librarians {
     static int count = 0;
 
     public static void readFile() throws FileNotFoundException, ParseException {
-        File f = new File("librarians.txt");
+        //File f = new File("librarians.txt");
         count = 0;
-        Scanner s = new Scanner(f);
+        Scanner s = new Scanner("librarians.txt");
         while (s.hasNext()) {
             int id = count + 1;
             String name = s.next();
@@ -112,8 +112,8 @@ public class Librarians {
     }
 
     public static void saveFile() throws FileNotFoundException {
-        File f = new File("librarians.txt");
-        PrintWriter pw = new PrintWriter(f);
+       //File f = new File("librarians.txt");
+        PrintWriter pw = new PrintWriter("librarians.txt");
 
         for (int i = 0; i < count; i++) {
             pw.print(l[i].getId() + " ");
