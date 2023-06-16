@@ -251,11 +251,11 @@ public class viewPayments extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Checkout ID", "Customer ID", "Customer Name", "Book Call #", "Book Title", "Quantity", "Branch ID", "Return date", "Payment", "Fine"
+                "Checkout ID", "Customer ID", "Customer Name", "Book Call #", "Book Title", "Quantity", "Branch ID", "Payment date", "Payment"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -334,7 +334,7 @@ public class viewPayments extends javax.swing.JFrame {
 
         jLabel18.setBackground(new java.awt.Color(255, 255, 255));
         jLabel18.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
-        jLabel18.setText("Return date:");
+        jLabel18.setText("Payment date:");
 
         jTextField8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -407,13 +407,10 @@ public class viewPayments extends javax.swing.JFrame {
                                                 .addGap(18, 18, 18)))
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(18, 18, 18))
-                                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(16, 16, 16)))
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addGap(16, 16, 16)
                                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                     .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                                                     .addComponent(jTextField9)))
@@ -442,10 +439,10 @@ public class viewPayments extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(12, 12, 12)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -459,9 +456,8 @@ public class viewPayments extends javax.swing.JFrame {
                         .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -668,18 +664,18 @@ public class viewPayments extends javax.swing.JFrame {
     String bookTitleFilter = jTextField5.getText().trim();
     String branchIdFilter = jTextField4.getText().trim();
     String endDateFilter = jTextField6.getText().trim();
-    String returnDateFilter = jTextField9.getText().trim();
+    String paymentDateFilter = jTextField9.getText().trim();
     String startDateFilter = jTextField2.getText().trim();
     String callNoFilter = jTextField3.getText().trim();
 
     try (Connection connection = DBConnection.getConnection()) {
         StringBuilder queryBuilder = new StringBuilder("SELECT c.id AS checkout_id, c.customer_id, cus.name AS customer_name, " +
-                "b.title AS book_title, b.call_num AS book_call_num,ci.quantity AS quantity, c.branch_id, c.pickup_date,c.return_date, p.payment, p.fine " +
+                "b.title AS book_title, b.call_num AS book_call_num,ci.quantity AS quantity, c.branch_id, c.pickup_date,c.return_date, p.payment, p.payment_date " +
                 "FROM checkout c " +
                 "JOIN customer cus ON c.customer_id = cus.id " +
                 "JOIN checkout_item ci ON c.id = ci.checkout_id " +
                 "JOIN book b ON ci.book_call_num = b.call_num " +
-                "LEFT JOIN payment p ON c.id = p.checkout_id " +
+                "INNER JOIN payment p ON c.id = p.checkout_id " +
                 "WHERE 1=1");
 
         if (!checkoutIdFilter.isEmpty()) {
@@ -697,14 +693,14 @@ public class viewPayments extends javax.swing.JFrame {
         if (!branchIdFilter.isEmpty()) {
             queryBuilder.append(" AND c.branch_id = ?");
         }
-        if (!returnDateFilter.isEmpty()) {
-            queryBuilder.append(" AND c.return_date = ?");
+        if (!paymentDateFilter.isEmpty()) {
+            queryBuilder.append(" AND c.payment_date = ?");
         }
         if (!startDateFilter.isEmpty()) {
-            queryBuilder.append(" AND c.return_date >= ?");
+            queryBuilder.append(" AND c.payment_date >= ?");
         }
         if (!endDateFilter.isEmpty()) {
-            queryBuilder.append(" AND c.return_date <= ?");
+            queryBuilder.append(" AND c.payment_date <= ?");
         }
 
         PreparedStatement statement = connection.prepareStatement(queryBuilder.toString());
@@ -726,8 +722,8 @@ public class viewPayments extends javax.swing.JFrame {
         if (!branchIdFilter.isEmpty()) {
             statement.setInt(parameterIndex++, Integer.parseInt(branchIdFilter));
         }
-        if (!returnDateFilter.isEmpty()) {
-            statement.setString(parameterIndex++, returnDateFilter);
+        if (!paymentDateFilter.isEmpty()) {
+            statement.setString(parameterIndex++, paymentDateFilter);
         }
         if (!startDateFilter.isEmpty()) {
             statement.setString(parameterIndex++, startDateFilter);
@@ -745,16 +741,15 @@ public class viewPayments extends javax.swing.JFrame {
             int customerId = resultSet.getInt("customer_id");
             String customerName = resultSet.getString("customer_name");
             String bookTitle = resultSet.getString("book_title");
-                        int quantity = resultSet.getInt("quantity");
+            int quantity = resultSet.getInt("quantity");
             int branchId = resultSet.getInt("branch_id");
             int bookCallNum = resultSet.getInt("book_call_num");
-            String returnDate = resultSet.getString("return_date");
+            String paymentDate = resultSet.getString("payment_date");
             float payment = resultSet.getFloat("payment");
-            float fine = resultSet.getFloat("fine");
 
             tableModel.addRow(new Object[]{
                     checkoutId, customerId, customerName, bookCallNum, bookTitle,quantity, branchId,
-                    returnDate, payment, fine
+                    paymentDate, payment,
             });
         }
 

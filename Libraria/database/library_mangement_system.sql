@@ -79,8 +79,17 @@ REFERENCES library_management_system.branch (id)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
 
-INSERT INTO library_management_system.admin (name,email,password,branch) VALUES 
-('admin1','admin1@admin.com',md5('admin1'),1); 
+ALTER TABLE checkout_item
+ADD COLUMN payment_due FLOAT NOT NULL;
+
+ALTER TABLE payment
+ADD COLUMN payment_date DATE NOT NULL;
+
+ALTER TABLE admin
+ADD COLUMN phone FLOAT NOT NULL AFTER password;
+
+INSERT INTO library_management_system.admin (name,email,password,phone,branch,salary) VALUES 
+('admin2','admin2@admin.com',md5('admin2'),'123456789','2','5000'); 
 
 INSERT INTO library_management_system.librarian (name,email,password,phone,branch) VALUES 
 ('lib1','lib1@lib.com',md5('lib1'),00000000,1);
@@ -97,5 +106,10 @@ INSERT INTO library_management_system.branch (address,city) VALUES
 INSERT INTO book (title, author, genre, total_quantity, total_stock, fee)
 VALUES ('Book1', 'Author1', 'Genre1', 5, 3, 7.99),
        ('Book2', 'Author2', 'Genre2', 10, 5, 9.99);
-       
+
+INSERT INTO checkout (customer_id, branch_id, checkout_date, status, pickup_date,return_date, total_payment_due, fine)
+VALUES ('1', '2', '2023-06-16', 'Pending', '2023-06-16','2023-06-20','7.99','0.0'); 
+
+INSERT INTO checkout_item (checkout_id, book_call_num, quantity, payment_due)
+VALUES ('2', '2','1','7.99');     
        

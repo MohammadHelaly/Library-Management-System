@@ -669,6 +669,58 @@ private void issueCheckout() {
     String checkoutId = jTextField1.getText().trim();
     LocalDate today = LocalDate.now();
     String currentDate = today.format(DateTimeFormatter.ISO_DATE);
+    int branchId = sessionManager.getBranchId();
+
+    try (Connection connection = DBConnection.getConnection()) {
+        PreparedStatement statement = connection.prepareStatement(
+            "SELECT * FROM checkout WHERE id = ? AND branch_id = ?");
+        statement.setString(1, checkoutId);
+        statement.setInt(2, branchId);
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) {
+            int existingCheckoutId = resultSet.getInt("id");
+            String existingStatus = resultSet.getString("status");
+            String pickupDate = resultSet.getString("pickup_date");
+            String returnDate = resultSet.getString("return_date");
+
+            if (currentDate.compareTo(pickupDate) >= 0 && currentDate.compareTo(returnDate) < 0) {
+                if (existingStatus.equals("Pending")) {
+                    PreparedStatement updateStatement = connection.prepareStatement(
+                        "UPDATE checkout SET status = ? WHERE id = ?");
+                    updateStatement.setString(1, "Checked out");
+                    updateStatement.setInt(2, existingCheckoutId);
+                    int rowsAffected = updateStatement.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        JOptionPane.showMessageDialog(null, "Status updated successfully.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to update status.");
+                    }
+
+                    updateStatement.close();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Checkout status is already checked out.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Cannot update status. Current date is outside the pickup and return date range.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No checkout found with the specified ID in this branch.");
+        }
+
+        resultSet.close();
+        statement.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}    
+    
+/*
+private void issueCheckout() {
+    String checkoutId = jTextField1.getText().trim();
+    LocalDate today = LocalDate.now();
+    String currentDate = today.format(DateTimeFormatter.ISO_DATE);
 
     try (Connection connection = DBConnection.getConnection()) {
         PreparedStatement statement = connection.prepareStatement(
@@ -713,7 +765,7 @@ private void issueCheckout() {
         e.printStackTrace();
     }
 }
-
+*/
 private void cancelCheckout() {
     String checkoutId = jTextField3.getText().trim();
 
@@ -740,7 +792,7 @@ private void cancelCheckout() {
 
                 if (rowsAffected > 0) {
                     // Update book quantity
-                    updateBookQuantity(connection, bookCallNum, quantity);
+                    updateBookStock(connection, bookCallNum, quantity);
                     updateBranchStock(connection, bookCallNum, branchId, quantity);
 
                     JOptionPane.showMessageDialog(null, "Checkout canceled successfully.");
@@ -763,6 +815,61 @@ private void cancelCheckout() {
     }
 }
 
+private void returnCheckout() {
+    String checkoutId = jTextField2.getText().trim();
+    int branchId = sessionManager.getBranchId();
+
+    try (Connection connection = DBConnection.getConnection()) {
+        PreparedStatement statement = connection.prepareStatement(
+            "SELECT * FROM checkout WHERE id = ? AND branch_id = ?");
+        statement.setString(1, checkoutId);
+        statement.setInt(2, branchId);
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) {
+            int existingCheckoutId = resultSet.getInt("id");
+            String existingStatus = resultSet.getString("status");
+
+            if (existingStatus.equals("Checked out")) {
+                int bookCallNum = getBookCallNumberForCheckout(connection, existingCheckoutId);
+                int quantity = getQuantityForCheckout(connection, existingCheckoutId);
+
+                // Update checkout status
+                PreparedStatement updateStatement = connection.prepareStatement(
+                    "UPDATE checkout SET status = ? WHERE id = ?");
+                updateStatement.setString(1, "Returned");
+                updateStatement.setInt(2, existingCheckoutId);
+                int rowsAffected = updateStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    // Update book quantity
+                    updateBookStock(connection, bookCallNum, quantity);
+                    updateBranchStock(connection, bookCallNum, branchId, quantity);
+                    updatePayments(connection, existingCheckoutId);
+
+                    JOptionPane.showMessageDialog(null, "Checkout returned successfully.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to update checkout status.");
+                }
+
+                updateStatement.close();
+            } else {
+                JOptionPane.showMessageDialog(null, "Checkout status is not checked out.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No checkout found with the specified ID in the current branch.");
+        }
+
+        resultSet.close();
+        statement.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+
+
+/*
 private void returnCheckout() {
     String checkoutId = jTextField2.getText().trim();
 
@@ -790,8 +897,9 @@ private void returnCheckout() {
 
                 if (rowsAffected > 0) {
                     // Update book quantity
-                    updateBookQuantity(connection, bookCallNum, quantity);
+                    updateBookStock(connection, bookCallNum, quantity);
                     updateBranchStock(connection, bookCallNum, branchId, quantity);
+                    updatePayments(connection,existingCheckoutId);
 
                     JOptionPane.showMessageDialog(null, "Checkout returned successfully.");
                 } else {
@@ -810,6 +918,43 @@ private void returnCheckout() {
         statement.close();
     } catch (SQLException e) {
         e.printStackTrace();
+    }
+}
+
+*/
+
+
+private void updatePayments(Connection connection, int checkoutId) throws SQLException {
+    
+    String checkoutQuery = "SELECT total_payment_due, fine FROM checkout WHERE id = ?";
+    try (PreparedStatement checkoutStatement = connection.prepareStatement(checkoutQuery)) {
+        checkoutStatement.setInt(1, checkoutId);
+        ResultSet checkoutResult = checkoutStatement.executeQuery();
+
+        if (checkoutResult.next()) {
+                float paymentDue = checkoutResult.getFloat("total_payment_due");
+                float fine = checkoutResult.getFloat("fine");
+                float payment = paymentDue + fine;
+
+            // Insert a new entry into the payments table
+            String paymentInsertQuery = "INSERT INTO payment (checkout_id, payment, payment_date) VALUES (?, ?, ?)";
+            try (PreparedStatement paymentInsertStatement = connection.prepareStatement(paymentInsertQuery)) {
+                paymentInsertStatement.setInt(1, checkoutId);
+                paymentInsertStatement.setFloat(2, payment);
+                
+                // Get today's date
+                LocalDate currentDate = LocalDate.now();
+                Date paymentDate = Date.valueOf(currentDate);
+                
+                paymentInsertStatement.setDate(3, paymentDate);
+                
+                paymentInsertStatement.executeUpdate();
+                paymentInsertStatement.close();
+                // System.out.println("Payment recorded successfully.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No checkout found with the provided Checkout ID.");
+        }
     }
 }
 
@@ -845,12 +990,11 @@ private int getQuantityForCheckout(Connection connection, int checkoutId) throws
     throw new SQLException("Failed to retrieve quantity for checkout.");
 }
 
-private void updateBookQuantity(Connection connection, int bookCallNum, int quantity) throws SQLException {
+private void updateBookStock(Connection connection, int bookCallNum, int quantity) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(
-        "UPDATE book SET total_stock = total_stock + ?, total_quantity = total_quantity + ? WHERE call_num = ?");
+        "UPDATE book SET total_stock = total_stock + ? WHERE call_num = ?");
     statement.setInt(1, quantity);
-    statement.setInt(2, quantity);
-    statement.setInt(3, bookCallNum);
+    statement.setInt(2, bookCallNum);
     statement.executeUpdate();
     statement.close();
 }
@@ -895,7 +1039,7 @@ private void applyFineForOverdueCheckouts() {
 
 private void applyFine(Connection connection, int checkoutId) throws SQLException {
     PreparedStatement updateStatement = connection.prepareStatement(
-        "UPDATE payment SET fine = 50.00 WHERE checkout_id = ?");
+        "UPDATE checkout SET fine = 50.00 WHERE checkout_id = ?");
     updateStatement.setInt(1, checkoutId);
     int rowsAffected = updateStatement.executeUpdate();
     updateStatement.close();
