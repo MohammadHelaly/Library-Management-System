@@ -204,11 +204,11 @@ public class viewBranches extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Branch ID", "Address", "City", "Phone number"
+                "Branch ID", "Address", "City", "Phone number", "Branch inventory", "Branch stock"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -465,7 +465,7 @@ public class viewBranches extends javax.swing.JFrame {
             }
         });
     }
-
+/*
            private void populateTable() {
     DefaultTableModel tableModel = (DefaultTableModel) jTable1.getModel();
         String id = jTextField4.getText().trim();        
@@ -502,6 +502,60 @@ try (Connection connection = DBConnection.getConnection()) {
                     String Address = resultSet.getString("address");
 
                     tableModel.addRow(new Object[]{ID, Address, City, Phone});
+                }
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } catch (NumberFormatException ex) {
+        // Handle parsing errors for call_num, stock, and quantity
+        ex.printStackTrace();
+    }
+}
+*/
+    
+    private void populateTable() {
+    DefaultTableModel tableModel = (DefaultTableModel) jTable1.getModel();
+    String id = jTextField4.getText().trim();
+    String city = jTextField5.getText().trim();
+
+    try (Connection connection = DBConnection.getConnection()) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT branch.id, branch.address, branch.city, branch.phone, SUM(book_inventory.branch_quantity) AS total_quantity, SUM(book_inventory.branch_stock) AS total_stock ");
+        queryBuilder.append("FROM branch LEFT JOIN book_inventory ON branch.id = book_inventory.branch_id ");
+        queryBuilder.append("WHERE 1");
+
+        if (!id.isEmpty()) {
+            queryBuilder.append(" AND branch.id = ?");
+        }
+        if (!city.isEmpty()) {
+            queryBuilder.append(" AND branch.city LIKE ?");
+        }
+
+        queryBuilder.append(" GROUP BY branch.id");
+
+        try (PreparedStatement statement = connection.prepareStatement(queryBuilder.toString())) {
+            int parameterIndex = 1;
+
+            if (!id.isEmpty()) {
+                int val = Integer.parseInt(id);
+                statement.setInt(parameterIndex++, val);
+            }
+            if (!city.isEmpty()) {
+                statement.setString(parameterIndex++, "%" + city + "%");
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                tableModel.setRowCount(0); // Clear existing data
+
+                while (resultSet.next()) {
+                    String City = resultSet.getString("city");
+                    int ID = resultSet.getInt("id");
+                    int Phone = resultSet.getInt("phone");
+                    String Address = resultSet.getString("address");
+                    int totalQuantity = resultSet.getInt("total_quantity");
+                    int totalStock = resultSet.getInt("total_stock");
+
+                    tableModel.addRow(new Object[]{ID, Address, City, Phone, totalQuantity, totalStock});
                 }
             }
         }

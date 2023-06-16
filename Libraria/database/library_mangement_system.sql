@@ -15,6 +15,7 @@ email VARCHAR(255) NOT NULL,
 password VARCHAR(255) NOT NULL,
 phone INT NOT NULL,
 branch INT NOT NULL,
+salary FLOAT NOT NULL,
 PRIMARY KEY (id));
 
 CREATE TABLE IF NOT EXISTS library_management_system.customer (
@@ -77,8 +78,6 @@ FOREIGN KEY (branch)
 REFERENCES library_management_system.branch (id)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
-
-ALTER TABLE branch ADD COLUMN phone INT;
 
 INSERT INTO library_management_system.admin (name,email,password,branch) VALUES 
 ('admin1','admin1@admin.com',md5('admin1'),1); 
